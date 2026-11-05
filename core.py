@@ -1,5 +1,7 @@
 """Inference primitives for the released B0 + DINOv2 face classifier."""
 from pathlib import Path
+import hashlib
+import json
 import torch
 from torch import nn
 from torchvision import transforms as T
@@ -22,6 +24,13 @@ def transform(size=224):
 def load_checkpoint(path, device='cpu'):
     if not Path(path).is_file():
         raise FileNotFoundError('Model missing. Run: python download_weights.py')
+    root = Path(__file__).resolve().parent
+    spec = json.loads((root / 'model_manifest.json').read_text(encoding='utf-8'))
+    if Path(path).resolve() == (root / 'weights' / spec['filename']).resolve():
+        with Path(path).open('rb') as model_file:
+            digest = hashlib.file_digest(model_file, 'sha256').hexdigest()
+        if digest != spec['sha256'] or Path(path).stat().st_size != spec['bytes']:
+            raise ValueError('Model version mismatch. Run: python download_weights.py --upgrade')
     state = torch.load(path, map_location='cpu', weights_only=True)
     if state.get('positive_class') != 'fake' or state.get('kind') != 'b0_dino_blend':
         raise ValueError('Unsupported model file or class direction.')

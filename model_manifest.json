@@ -1,7 +1,13 @@
 {
-  "version": "v0.1.0",
+  "version": "v0.2.0",
   "filename": "facecheck-ensemble.pt",
-  "bytes": 104620685,
-  "sha256": "16a69fc5e218bb6a4662167eb27949bdc75a145f1a2f23fda8a6cbc4d5b52ff5",
-  "url": "https://github.com/xjwxjwxjwwjl/facecheck-local/releases/download/v0.1.0/facecheck-ensemble.pt"
+  "bytes": 104595277,
+  "sha256": "bf4f5c59d66c75fc35a2025506e057c74ad46d75d30f05d53aa5c51c9dc9cba4",
+  "url": "https://github.com/xjwxjwxjwwjl/facecheck-local/releases/download/v0.2.0/facecheck-ensemble.pt",
+  "previous_versions": [
+    {
+      "version": "v0.1.0",
+      "sha256": "16a69fc5e218bb6a4662167eb27949bdc75a145f1a2f23fda8a6cbc4d5b52ff5"
+    }
+  ]
 }

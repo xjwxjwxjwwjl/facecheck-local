@@ -19,6 +19,18 @@ python -m venv .venv
 
 仅使用CPU时，把PyTorch安装命令中的索引换成 `https://download.pytorch.org/whl/cpu`。PyTorch环境可能需要数GB下载和存储空间；模型文件本身约100MiB。
 
+## 更新到 v0.2.0
+
+本版使用追加两轮训练的 B0 和增强特征训练的 DINO 分类头，输入尺寸为 224×224，两个分支的概率各占一半。
+
+已有 v0.1.0 用户先获取本版代码，再执行以下命令。脚本校验新版下载，完成后将旧权重保存在 `weights/facecheck-ensemble.v0.1.0.pt`。
+
+```powershell
+.\.venv\Scripts\python.exe download_weights.py --upgrade
+```
+
+重新启动网页服务后，页面会显示 v0.2.0。完整内部验证准确率为 99.8577%，评估范围和扰动结果见 MODEL_CARD.md。
+
 ## 打开网页
 
 Windows双击 **启动检测网页.cmd**，浏览器打开 http://127.0.0.1:8766 。选择或拖入1–20张图片，点击“开始检测”；首次加载模型稍慢。单张最大8MB、2000万像素，总体积最大24MB。
