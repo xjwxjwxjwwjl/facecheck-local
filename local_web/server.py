@@ -13,6 +13,7 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 ROOT = Path(__file__).resolve().parents[1]
+MODEL_VERSION = json.loads((ROOT / 'model_manifest.json').read_text(encoding='utf-8'))['version']
 os.chdir(ROOT)
 sys.path.insert(0, str(ROOT))
 TOKEN = secrets.token_urlsafe(32)
@@ -25,6 +26,7 @@ class Engine:
     def __init__(self):
         self.model = None
         self.device = None
+        self.device_name = None
 
     def predict(self, files):
         from PIL import Image, ImageOps, UnidentifiedImageError
@@ -65,6 +67,7 @@ class Engine:
             torch.set_num_threads(8)
             self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
             self.model, _ = load_checkpoint(ROOT / 'weights/facecheck-ensemble.pt', self.device)
+            self.device_name = torch.cuda.get_device_name(0) if self.device == 'cuda' else 'CPU'
         start = time.perf_counter()
         probabilities = []
         with torch.inference_mode():
@@ -76,7 +79,7 @@ class Engine:
         return dict(results=[dict(filename=f['name'], fake_probability=p,
                                  prediction='AI生成' if p >= .5 else '真实倾向')
                              for f, p in zip(files, probabilities)],
-                    device=torch.cuda.get_device_name(0) if self.device == 'cuda' else 'CPU',
+                    device=self.device_name, model_version=MODEL_VERSION,
                     seconds=round(time.perf_counter() - start, 3))
 
 
@@ -108,7 +111,8 @@ class Handler(BaseHTTPRequestHandler):
             return self.reply(200, html.encode('utf-8'), 'text/html; charset=utf-8')
         if self.path == '/api/status':
             return self.reply(200, dict(service='facecheck-public-local', loaded=ENGINE.model is not None,
-                                        device=ENGINE.device, busy=LOCK.locked()))
+                                        device=ENGINE.device, device_name=ENGINE.device_name,
+                                        model_version=MODEL_VERSION, busy=LOCK.locked()))
         if self.path == '/favicon.ico':
             return self.reply(204, b'', 'image/x-icon')
         return self.reply(404, {'error': '页面不存在。'})
